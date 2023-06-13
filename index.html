@@ -19,16 +19,49 @@
       { type: 'page', path: '/contact-me' },
       { type: 'home', path: '/' },
     ]
-    const client = prismic.createClient(repositoryName, { routes })
+    const accessToken = 'MC5aSWdtM0JVQUFDc0E4ZzRv.Le-_ve-_ve-_vW5KUO-_vTkD77-9eO-_vTVjee-_vQoF77-977-9UO-_ve-_vX3vv71OIu-_ve-_ve-_ve-_vQ'
+    const client = prismic.createClient(repositoryName, { accessToken })
 
+    const handleTextSlice = (textSlice) => {
+      return prismic.asHTML(textSlice.text)
+        // `<div class="text-slice">${textSlice.text.map(tx => (tx.text))[0]}</div>`;
+    };
+
+    const handleQuoteSlice = (quoteSlice) => {
+      return previousSlices + `<blockquote class="quote-slice">${quoteSlice.quote}</blockquote>`;
+    };
+
+    const handleImageSlice = (imageSlice) => {
+      return prismic.asHTML([imageSlice.image])
+      // return prismic.asHTML(`<img class="image-slice" width="${imageSlice.image.dimensions.width}" height="${imageSlice.image.dimensions.height}" src="${imageSlice.image.url}" alt="${imageSlice.image.alt}" />`);
+    };
+
+    const handleSlice = (previousSlices, slice) => {
+      switch (slice.slice_type) {
+        case 'text':
+          return previousSlices + handleTextSlice(slice.primary);
+        // case 'quote':
+        //   return previousSlices + handleQuoteSlice(slice.primary);
+        case 'image':
+          return previousSlices + handleImageSlice(slice.primary);
+        default:
+          return '';
+      }
+};
 
     const init = async () => {
-      const prismicDoc = await client.getFirst()
+      // const prismicDoc = await client.getFirst()
+      const prismicDoc = await client.getByUID('page', 'about')
+      console.log('prism', prismicDoc)
       const { title, description } = prismicDoc.data
       const titleHTML = prismic.asHTML(title)
       const descriptionHTML = prismic.asHTML(description)
       const container = document.getElementById('container')
+      const SliceZone = prismicDoc.data.slices.reduce((previousSlices, slice) => {
+        return handleSlice(previousSlices, slice)
+      }, '')
       container.innerHTML = titleHTML + descriptionHTML
+      container.innerHTML += SliceZone
       // client.getSingle('home')
     }
 
