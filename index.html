@@ -7,7 +7,32 @@
   <title>Document</title>
 </head>
 <body>
-  <p>Hi</p>
+  <div id="container"></div>
   <script async defer src="https://static.cdn.prismic.io/prismic.js?new=true&repo=ardhihdra"></script>
+  <script type='module'>
+    import * as prismic from 'https://cdn.skypack.dev/@prismicio/client'
+
+    const repositoryName = 'ardhihdra'
+    const routes = [
+      // Update to match your website's URL structure
+      { type: 'page', path: '/about' },
+      { type: 'page', path: '/contact-me' },
+      { type: 'home', path: '/' },
+    ]
+    const client = prismic.createClient(repositoryName, { routes })
+
+
+    const init = async () => {
+      const prismicDoc = await client.getFirst()
+      const { title, description } = prismicDoc.data
+      const titleHTML = prismic.asHTML(title)
+      const descriptionHTML = prismic.asHTML(description)
+      const container = document.getElementById('container')
+      container.innerHTML = titleHTML + descriptionHTML
+      // client.getSingle('home')
+    }
+
+    init()
+  </script>
 </body>
 </html>
